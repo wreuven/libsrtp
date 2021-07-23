@@ -1550,6 +1550,8 @@ srtp_err_status_t srtp_aes_expand_decryption_key(
     int i;
     srtp_err_status_t status;
     int num_rounds = expanded_key->num_rounds;
+    
+    printf("srtp_aes_expand_decryption_key\n"); 
 
     status = srtp_aes_expand_encryption_key(key, key_len, expanded_key);
     if (status) {
