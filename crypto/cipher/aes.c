@@ -2130,6 +2130,10 @@ static inline void aes_inv_final_round(v128_t *state, const v128_t *round_key)
 
 void srtp_aes_encrypt(v128_t *plaintext, const srtp_aes_expanded_key_t *exp_key)
 {
+    static int cnt=0;  
+    if ((cnt++ % 100) == 0) 
+        printf("srtp_aes_encrypt\n"); 
+    
     /* add in the subkey */
     v128_xor_eq(plaintext, &exp_key->round[0]);
 
@@ -2160,6 +2164,10 @@ void srtp_aes_encrypt(v128_t *plaintext, const srtp_aes_expanded_key_t *exp_key)
 
 void srtp_aes_decrypt(v128_t *plaintext, const srtp_aes_expanded_key_t *exp_key)
 {
+    static int cnt=0;  
+    if ((cnt++ % 100) == 0) 
+        printf("srtp_aes_decrypt\n"); 
+    
     /* add in the subkey */
     v128_xor_eq(plaintext, &exp_key->round[0]);
 
