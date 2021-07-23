@@ -1528,7 +1528,7 @@ srtp_err_status_t srtp_aes_expand_encryption_key(
     int key_len,
     srtp_aes_expanded_key_t *expanded_key)
 {
-    printf("srtp_aes_expand_encryption_key\n"); 
+    printf("srtp_aes_expand_encryption_key key="); 
     for (int i=0; i<key_len; i++) {
         printf("%x", key[i]);
     }
@@ -2141,7 +2141,7 @@ void srtp_aes_encrypt(v128_t *plaintext, const srtp_aes_expanded_key_t *exp_key)
     static int cnt=0;  
 
     if (cnt==0) {
-        printf("%s\n", v128_hex_string(plaintext));
+        printf("in: %s\n", v128_hex_string(plaintext));
     }
 
     if ((cnt % 100) == 0) 
@@ -2176,7 +2176,7 @@ void srtp_aes_encrypt(v128_t *plaintext, const srtp_aes_expanded_key_t *exp_key)
     }
 
     if (cnt++ == 0) {
-        printf("%s\n", v128_hex_string(plaintext));
+        printf("out: %s\n", v128_hex_string(plaintext));
     }
 }
 
