@@ -1528,6 +1528,8 @@ srtp_err_status_t srtp_aes_expand_encryption_key(
     int key_len,
     srtp_aes_expanded_key_t *expanded_key)
 {
+    printf("srtp_aes_expand_encryption_key\n"); 
+
     if (key_len == 16) {
         aes_128_expand_encryption_key(key, expanded_key);
         return srtp_err_status_ok;
