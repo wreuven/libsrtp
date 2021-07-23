@@ -2144,7 +2144,7 @@ void srtp_aes_encrypt(v128_t *plaintext, const srtp_aes_expanded_key_t *exp_key)
         printf("%s\n", v128_hex_string(plaintext));
     }
 
-    if ((cnt++ % 100) == 0) 
+    if ((cnt % 100) == 0) 
         printf("srtp_aes_encrypt\n"); 
 
     
@@ -2174,8 +2174,8 @@ void srtp_aes_encrypt(v128_t *plaintext, const srtp_aes_expanded_key_t *exp_key)
         aes_round(plaintext, &exp_key->round[13]);
         aes_final_round(plaintext, &exp_key->round[14]);
     }
-    
-    if (cnt==0) {
+
+    if (cnt++ == 0) {
         printf("%s\n", v128_hex_string(plaintext));
     }
 }
