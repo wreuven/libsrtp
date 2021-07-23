@@ -89,7 +89,9 @@ srtp_debug_module_t srtp_mod_aes_gcm = {
 #define GCM_AUTH_TAG_LEN 16
 #define GCM_AUTH_TAG_LEN_8 8
 
-#define FUNC_ENTRY() debug_print(srtp_mod_aes_gcm, "%s entry", __func__);
+//#define FUNC_ENTRY() debug_print(srtp_mod_aes_gcm, "%s entry", __func__);
+#define FUNC_ENTRY() printf(srtp_mod_aes_gcm, "%s entry", __func__);
+
 /*
  * This function allocates a new instance of this crypto engine.
  * The key_len parameter should be one of 28 or 44 for
