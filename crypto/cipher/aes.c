@@ -1529,6 +1529,10 @@ srtp_err_status_t srtp_aes_expand_encryption_key(
     srtp_aes_expanded_key_t *expanded_key)
 {
     printf("srtp_aes_expand_encryption_key\n"); 
+    for (int i=0; i<key_len; i++) {
+        printf("%x", key[i]);
+    }
+    printf("\n");
 
     if (key_len == 16) {
         aes_128_expand_encryption_key(key, expanded_key);
@@ -2135,8 +2139,14 @@ static inline void aes_inv_final_round(v128_t *state, const v128_t *round_key)
 void srtp_aes_encrypt(v128_t *plaintext, const srtp_aes_expanded_key_t *exp_key)
 {
     static int cnt=0;  
+
+    if (cnt==0) {
+        printf("%s\n", v128_hex_string(plaintext));
+    }
+
     if ((cnt++ % 100) == 0) 
         printf("srtp_aes_encrypt\n"); 
+
     
     /* add in the subkey */
     v128_xor_eq(plaintext, &exp_key->round[0]);
@@ -2163,6 +2173,10 @@ void srtp_aes_encrypt(v128_t *plaintext, const srtp_aes_expanded_key_t *exp_key)
         aes_round(plaintext, &exp_key->round[12]);
         aes_round(plaintext, &exp_key->round[13]);
         aes_final_round(plaintext, &exp_key->round[14]);
+    }
+    
+    if (cnt==0) {
+        printf("%s\n", v128_hex_string(plaintext));
     }
 }
 
