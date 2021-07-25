@@ -50,6 +50,28 @@
 #include "aes.h"
 #include "err.h"
 
+typedef  uint8_t        v128_t[16];
+typedef  unsigned int   srtp_err_status_t;
+typedef  void*          srtp_aes_expanded_key_t;
+
+typedef srtp_err_status_t (*f_srtp_aes_expand_encryption_key)(const uint8_t* key, int key_len, srtp_aes_expanded_key_t* expanded_key);
+typedef srtp_err_status_t (*f_srtp_aes_expand_decryption_key)(const uint8_t* key, int key_len, srtp_aes_expanded_key_t* expanded_key);
+typedef void (*f_srtp_aes_encrypt)(v128_t* plaintext, const srtp_aes_expanded_key_t* expanded_key);
+typedef void (*f_srtp_aes_decrypt)(v128_t* plaintext, const srtp_aes_expanded_key_t* expanded_key);
+
+typedef struct {
+    f_srtp_aes_expand_encryption_key  srtp_aes_expand_encryption_key;
+    f_srtp_aes_expand_decryption_key  srtp_aes_expand_decryption_key;
+    f_srtp_aes_encrypt                srtp_aes_encrypt;
+    f_srtp_aes_decrypt                srtp_aes_decrypt;
+} DRIVER;
+
+DRIVER *g_DRIVER = NULL;
+
+void aes_set_driver(DRIVER* driver) {
+    g_DRIVER = driver;
+}
+
 /*
  * we use the tables T0, T1, T2, T3, and T4 to compute AES, and
  * the tables U0, U1, U2, and U4 to compute its inverse
@@ -1528,11 +1550,8 @@ srtp_err_status_t srtp_aes_expand_encryption_key(
     int key_len,
     srtp_aes_expanded_key_t *expanded_key)
 {
-    printf("srtp_aes_expand_encryption_key\n  key:"); 
-    for (int i=0; i<key_len; i++) {
-        printf("%02x", key[i]);
-    }
-    printf("\n");
+    if (g_DRIVER)
+        return g_DRIVER->srtp_aes_expand_encryption_key(key, key_len, expanded_key);
 
     if (key_len == 16) {
         aes_128_expand_encryption_key(key, expanded_key);
@@ -1553,11 +1572,12 @@ srtp_err_status_t srtp_aes_expand_decryption_key(
     int key_len,
     srtp_aes_expanded_key_t *expanded_key)
 {
+    if (g_DRIVER)
+        return g_DRIVER->srtp_aes_expand_decryption_key(key, key_len, expanded_key);
+
     int i;
     srtp_err_status_t status;
     int num_rounds = expanded_key->num_rounds;
-    
-    printf("srtp_aes_expand_decryption_key\n"); 
 
     status = srtp_aes_expand_encryption_key(key, key_len, expanded_key);
     if (status) {
@@ -2138,15 +2158,9 @@ static inline void aes_inv_final_round(v128_t *state, const v128_t *round_key)
 
 void srtp_aes_encrypt(v128_t *plaintext, const srtp_aes_expanded_key_t *exp_key)
 {
-    static int cnt=0;  
+    if (g_DRIVER)
+        return g_DRIVER->srtp_aes_encrypt(plaintext, exp_key);
 
-    if ((cnt % 100) == 0) 
-        printf("srtp_aes_encrypt\n"); 
-
-    if (cnt==0) {
-        printf("in:   %s\n", v128_hex_string(plaintext));
-    }
-    
     /* add in the subkey */
     v128_xor_eq(plaintext, &exp_key->round[0]);
 
@@ -2173,18 +2187,13 @@ void srtp_aes_encrypt(v128_t *plaintext, const srtp_aes_expanded_key_t *exp_key)
         aes_round(plaintext, &exp_key->round[13]);
         aes_final_round(plaintext, &exp_key->round[14]);
     }
-
-    if (cnt++ == 0) {
-        printf("out:    %s\n", v128_hex_string(plaintext));
-    }
 }
 
 void srtp_aes_decrypt(v128_t *plaintext, const srtp_aes_expanded_key_t *exp_key)
 {
-    static int cnt=0;  
-    if ((cnt++ % 100) == 0) 
-        printf("srtp_aes_decrypt\n"); 
-    
+    if (g_DRIVER)
+        return g_DRIVER->srtp_aes_decrypt(plaintext, exp_key);
+
     /* add in the subkey */
     v128_xor_eq(plaintext, &exp_key->round[0]);
 
