@@ -2271,7 +2271,7 @@ void srtp_aes_decrypt(v128_t *plaintext, const srtp_aes_expanded_key_t *exp_key)
     }
     
     if (count++ == 0) {
-        printf("_srtp_aes_decrypt out: ");
+        printf("srtp_aes_decrypt out: ");
         for (int i=0; i<16; i++) {
             printf("%02x", plaintext->v8[i]);
         }
