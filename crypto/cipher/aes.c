@@ -50,10 +50,6 @@
 #include "aes.h"
 #include "err.h"
 
-typedef  uint8_t        v128_t[16];
-typedef  unsigned int   srtp_err_status_t;
-typedef  void*          srtp_aes_expanded_key_t;
-
 typedef srtp_err_status_t (*f_srtp_aes_expand_encryption_key)(const uint8_t* key, int key_len, srtp_aes_expanded_key_t* expanded_key);
 typedef srtp_err_status_t (*f_srtp_aes_expand_decryption_key)(const uint8_t* key, int key_len, srtp_aes_expanded_key_t* expanded_key);
 typedef void (*f_srtp_aes_encrypt)(v128_t* plaintext, const srtp_aes_expanded_key_t* expanded_key);
