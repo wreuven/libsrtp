@@ -1546,6 +1546,16 @@ srtp_err_status_t srtp_aes_expand_encryption_key(
     int key_len,
     srtp_aes_expanded_key_t *expanded_key)
 {
+    static int count = 0;
+    
+    if (count == 0) {
+        printf("srtp_aes_expand_encryption_key: ");
+        for (int i=0; i<16; i++) {
+            printf("%02x", key[i]);
+        }
+        printf("\n");
+    }
+    
     if (g_DRIVER)
         return g_DRIVER->srtp_aes_expand_encryption_key(key, key_len, expanded_key);
 
@@ -1568,6 +1578,16 @@ srtp_err_status_t srtp_aes_expand_decryption_key(
     int key_len,
     srtp_aes_expanded_key_t *expanded_key)
 {
+    static int count = 0;
+    
+    if (count == 0) {
+        printf("srtp_aes_expand_decryption_key: ");
+        for (int i=0; i<16; i++) {
+            printf("%02x", key[i]);
+        }
+        printf("\n");
+    }
+    
     if (g_DRIVER)
         return g_DRIVER->srtp_aes_expand_decryption_key(key, key_len, expanded_key);
 
@@ -2154,66 +2174,107 @@ static inline void aes_inv_final_round(v128_t *state, const v128_t *round_key)
 
 void srtp_aes_encrypt(v128_t *plaintext, const srtp_aes_expanded_key_t *exp_key)
 {
+    static int count = 0;
+    
+    if (count == 0) {
+        printf("srtp_aes_encrypt in: ");
+        for (int i=0; i<16; i++) {
+            printf("%02x", plaintext->v8[i]);
+        }
+        printf("\n");
+    }
+    
     if (g_DRIVER)
         return g_DRIVER->srtp_aes_encrypt(plaintext, exp_key);
+    
+    else {
 
-    /* add in the subkey */
-    v128_xor_eq(plaintext, &exp_key->round[0]);
+        /* add in the subkey */
+        v128_xor_eq(plaintext, &exp_key->round[0]);
 
-    /* now do the rounds */
-    aes_round(plaintext, &exp_key->round[1]);
-    aes_round(plaintext, &exp_key->round[2]);
-    aes_round(plaintext, &exp_key->round[3]);
-    aes_round(plaintext, &exp_key->round[4]);
-    aes_round(plaintext, &exp_key->round[5]);
-    aes_round(plaintext, &exp_key->round[6]);
-    aes_round(plaintext, &exp_key->round[7]);
-    aes_round(plaintext, &exp_key->round[8]);
-    aes_round(plaintext, &exp_key->round[9]);
-    if (exp_key->num_rounds == 10) {
-        aes_final_round(plaintext, &exp_key->round[10]);
-    } else if (exp_key->num_rounds == 12) {
-        aes_round(plaintext, &exp_key->round[10]);
-        aes_round(plaintext, &exp_key->round[11]);
-        aes_final_round(plaintext, &exp_key->round[12]);
-    } else if (exp_key->num_rounds == 14) {
-        aes_round(plaintext, &exp_key->round[10]);
-        aes_round(plaintext, &exp_key->round[11]);
-        aes_round(plaintext, &exp_key->round[12]);
-        aes_round(plaintext, &exp_key->round[13]);
-        aes_final_round(plaintext, &exp_key->round[14]);
+        /* now do the rounds */
+        aes_round(plaintext, &exp_key->round[1]);
+        aes_round(plaintext, &exp_key->round[2]);
+        aes_round(plaintext, &exp_key->round[3]);
+        aes_round(plaintext, &exp_key->round[4]);
+        aes_round(plaintext, &exp_key->round[5]);
+        aes_round(plaintext, &exp_key->round[6]);
+        aes_round(plaintext, &exp_key->round[7]);
+        aes_round(plaintext, &exp_key->round[8]);
+        aes_round(plaintext, &exp_key->round[9]);
+        if (exp_key->num_rounds == 10) {
+            aes_final_round(plaintext, &exp_key->round[10]);
+        } else if (exp_key->num_rounds == 12) {
+            aes_round(plaintext, &exp_key->round[10]);
+            aes_round(plaintext, &exp_key->round[11]);
+            aes_final_round(plaintext, &exp_key->round[12]);
+        } else if (exp_key->num_rounds == 14) {
+            aes_round(plaintext, &exp_key->round[10]);
+            aes_round(plaintext, &exp_key->round[11]);
+            aes_round(plaintext, &exp_key->round[12]);
+            aes_round(plaintext, &exp_key->round[13]);
+            aes_final_round(plaintext, &exp_key->round[14]);
+        }
+    }
+    
+    if (count++ == 0) {
+        printf("_srtp_aes_encrypt in: ");
+        for (int i=0; i<16; i++) {
+            printf("%02x", plaintext->v8[i]);
+        }
+        printf("\n");
     }
 }
 
 void srtp_aes_decrypt(v128_t *plaintext, const srtp_aes_expanded_key_t *exp_key)
 {
-    if (g_DRIVER)
-        return g_DRIVER->srtp_aes_decrypt(plaintext, exp_key);
-
-    /* add in the subkey */
-    v128_xor_eq(plaintext, &exp_key->round[0]);
-
-    /* now do the rounds */
-    aes_inv_round(plaintext, &exp_key->round[1]);
-    aes_inv_round(plaintext, &exp_key->round[2]);
-    aes_inv_round(plaintext, &exp_key->round[3]);
-    aes_inv_round(plaintext, &exp_key->round[4]);
-    aes_inv_round(plaintext, &exp_key->round[5]);
-    aes_inv_round(plaintext, &exp_key->round[6]);
-    aes_inv_round(plaintext, &exp_key->round[7]);
-    aes_inv_round(plaintext, &exp_key->round[8]);
-    aes_inv_round(plaintext, &exp_key->round[9]);
-    if (exp_key->num_rounds == 10) {
-        aes_inv_final_round(plaintext, &exp_key->round[10]);
-    } else if (exp_key->num_rounds == 12) {
-        aes_inv_round(plaintext, &exp_key->round[10]);
-        aes_inv_round(plaintext, &exp_key->round[11]);
-        aes_inv_final_round(plaintext, &exp_key->round[12]);
-    } else if (exp_key->num_rounds == 14) {
-        aes_inv_round(plaintext, &exp_key->round[10]);
-        aes_inv_round(plaintext, &exp_key->round[11]);
-        aes_inv_round(plaintext, &exp_key->round[12]);
-        aes_inv_round(plaintext, &exp_key->round[13]);
-        aes_inv_final_round(plaintext, &exp_key->round[14]);
+    static int count = 0;
+    
+    if (count == 0) {
+        printf("srtp_aes_decrypt in: ");
+        for (int i=0; i<16; i++) {
+            printf("%02x", plaintext->v8[i]);
+        }
+        printf("\n");
     }
+    
+    if (g_DRIVER)
+        g_DRIVER->srtp_aes_decrypt(plaintext, exp_key);
+
+    else {
+        /* add in the subkey */
+        v128_xor_eq(plaintext, &exp_key->round[0]);
+
+        /* now do the rounds */
+        aes_inv_round(plaintext, &exp_key->round[1]);
+        aes_inv_round(plaintext, &exp_key->round[2]);
+        aes_inv_round(plaintext, &exp_key->round[3]);
+        aes_inv_round(plaintext, &exp_key->round[4]);
+        aes_inv_round(plaintext, &exp_key->round[5]);
+        aes_inv_round(plaintext, &exp_key->round[6]);
+        aes_inv_round(plaintext, &exp_key->round[7]);
+        aes_inv_round(plaintext, &exp_key->round[8]);
+        aes_inv_round(plaintext, &exp_key->round[9]);
+        if (exp_key->num_rounds == 10) {
+            aes_inv_final_round(plaintext, &exp_key->round[10]);
+        } else if (exp_key->num_rounds == 12) {
+            aes_inv_round(plaintext, &exp_key->round[10]);
+            aes_inv_round(plaintext, &exp_key->round[11]);
+            aes_inv_final_round(plaintext, &exp_key->round[12]);
+        } else if (exp_key->num_rounds == 14) {
+            aes_inv_round(plaintext, &exp_key->round[10]);
+            aes_inv_round(plaintext, &exp_key->round[11]);
+            aes_inv_round(plaintext, &exp_key->round[12]);
+            aes_inv_round(plaintext, &exp_key->round[13]);
+            aes_inv_final_round(plaintext, &exp_key->round[14]);
+        }
+    }
+    
+    if (count++ == 0) {
+        printf("_srtp_aes_decrypt out: ");
+        for (int i=0; i<16; i++) {
+            printf("%02x", plaintext->v8[i]);
+        }
+        printf("\n");
+    }    
 }
