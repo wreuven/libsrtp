@@ -2647,10 +2647,6 @@ srtp_err_status_t srtp_unprotect_mki(srtp_ctx_t *ctx,
             return status;
         }
     }
-
-    static int cnt=0;  
-    if ((cnt % 100) == 0) 
-        printf("call srtp_cipher_decrypt %d\n", (uint32_t)enc_start); 
     
     /* if we're decrypting, add keystream into ciphertext */
     if (enc_start) {
