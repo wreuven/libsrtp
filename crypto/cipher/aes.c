@@ -1548,7 +1548,7 @@ srtp_err_status_t srtp_aes_expand_encryption_key(
 {
     static int count = 0;
     
-    if (count == 0) {
+    if (count++ % 10 == 0) {
         printf("srtp_aes_expand_encryption_key: ");
         for (int i=0; i<16; i++) {
             printf("%02x", key[i]);
@@ -1580,7 +1580,7 @@ srtp_err_status_t srtp_aes_expand_decryption_key(
 {
     static int count = 0;
     
-    if (count == 0) {
+    if (count++ % 10 == 0) {
         printf("srtp_aes_expand_decryption_key: ");
         for (int i=0; i<16; i++) {
             printf("%02x", key[i]);
